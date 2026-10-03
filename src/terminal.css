@@ -1,0 +1,251 @@
+/* Starward terminal aesthetic: dark console styling, zero assets.
+ * Imported after Tailwind so these component rules win over preflight. */
+
+:root {
+  --bg: #0b0e1a;
+  --panel: #131829;
+  --panel2: #1a2138;
+  --line: #2a3354;
+  --ink: #d7def5;
+  --dim: #8b94b8;
+  --accent: #6fd3ff;
+  --gold: #ffd36f;
+  --good: #7dffa8;
+  --bad: #ff8d7d;
+  --warn: #ffb46f;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(1200px 800px at 50% -10%, #141b36 0%, var(--bg) 60%);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+#app { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; }
+
+h1, h2, h3 { margin: 0.4em 0; font-weight: 600; }
+h1 { font-size: 1.6em; letter-spacing: 0.08em; }
+h2 { font-size: 1.25em; color: var(--accent); }
+h3 { font-size: 1.05em; color: var(--gold); }
+
+.titlebar {
+  display: flex; align-items: baseline; justify-content: space-between;
+  border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px;
+}
+.titlebar .sub { color: var(--dim); font-size: 0.85em; }
+
+nav.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+nav.tabs button {
+  background: var(--panel); color: var(--dim); border: 1px solid var(--line);
+  padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.95em;
+}
+nav.tabs button.active, nav.tabs button:hover { color: var(--ink); border-color: var(--accent); }
+nav.tabs button:disabled { opacity: 0.35; cursor: default; }
+
+.panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 12px;
+}
+
+.grid { display: grid; gap: 10px; }
+.grid.c2 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.grid.c3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+.card {
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px; cursor: default;
+}
+.card.pick { cursor: pointer; }
+.card.pick:hover { border-color: var(--accent); }
+.card.selected { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.card h4 { margin: 0 0 6px; }
+.card .dim { color: var(--dim); font-size: 0.88em; }
+
+button {
+  background: #223052; color: var(--ink); border: 1px solid var(--line);
+  padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.95em;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: default; }
+button.primary { background: #1d4d33; border-color: #2f7d4f; }
+button.danger { background: #4d2323; border-color: #7d3a3a; }
+button.gold { background: #4d3f1d; border-color: #7d6a2f; }
+
+input[type="text"], select {
+  background: #0e1322; color: var(--ink); border: 1px solid var(--line);
+  border-radius: 6px; padding: 8px 10px; font-size: 0.95em; width: 100%;
+}
+label { display: block; margin: 8px 0 4px; color: var(--dim); font-size: 0.9em; }
+
+.bar { height: 8px; background: #0e1322; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+.bar > span { display: block; height: 100%; border-radius: 4px; }
+.bar .hp { background: linear-gradient(90deg, #3fae6a, var(--good)); }
+.bar .mor { background: linear-gradient(90deg, #3f7dae, var(--accent)); }
+.bar .hullbar { background: linear-gradient(90deg, #8a6f3f, var(--gold)); }
+
+.tag {
+  display: inline-block; font-size: 0.78em; padding: 2px 8px; border-radius: 10px;
+  border: 1px solid var(--line); color: var(--dim); margin: 2px 4px 2px 0;
+}
+.tag.trait { color: var(--accent); border-color: #2f5d7d; }
+.tag.hook { color: var(--warn); border-color: #7d5a2f; }
+.tag.station { color: var(--good); border-color: #2f7d4f; }
+.tag.scar { color: var(--bad); border-color: #7d3a3a; }
+.tag.quirk { color: var(--gold); border-color: #7d6a2f; }
+
+.logstream {
+  background: #070a14; border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; height: 380px; overflow-y: auto; font-size: 0.93em; line-height: 1.55;
+  font-family: Consolas, Menlo, monospace; font-size: 0.88em;
+}
+.logstream .day { color: var(--gold); font-weight: 600; margin-top: 8px; }
+.logstream .entry { margin: 2px 0; }
+.logstream .entry.good { color: var(--good); }
+.logstream .entry.bad { color: var(--bad); }
+.logstream .entry.voyage { color: var(--accent); font-weight: 600; }
+.logstream .entry.captain { color: var(--gold); }
+.logstream.compact { height: 300px; }
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.muted { color: var(--dim); }
+.small { font-size: 0.85em; }
+.center { text-align: center; }
+.mt { margin-top: 12px; }
+
+.stat { display: inline-block; margin-right: 16px; }
+.stat b { color: var(--accent); }
+
+table.roster { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+table.roster th, table.roster td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.roster th { color: var(--dim); font-weight: 600; }
+
+.notice {
+  border: 1px solid var(--warn); background: #2a1f12; border-radius: 8px;
+  padding: 10px 14px; margin-bottom: 12px;
+}
+.notice.good { border-color: var(--good); background: #122a1c; }
+.notice.bad { border-color: var(--bad); background: #2a1414; }
+
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.95em; }
+.kv dt { color: var(--dim); }
+.kv dd { margin: 0; }
+
+@media (max-width: 640px) {
+  #app { padding: 10px 10px 40px; }
+  .logstream { height: 300px; }
+}
+
+/* Procedural art */
+
+#stars {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+}
+
+.sigil {
+  filter: drop-shadow(0 0 8px rgba(111, 211, 255, 0.22));
+  flex: none;
+}
+
+.identicon {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  vertical-align: middle;
+  flex: none;
+}
+
+.mono { font-family: Consolas, Menlo, monospace; }
+
+.logdiv {
+  color: var(--dim); letter-spacing: 0.35em; text-align: center;
+  margin: 10px 0 4px; font-family: Consolas, Menlo, monospace; font-size: 0.85em;
+}
+
+.shiphead { display: flex; gap: 16px; align-items: center; }
+.shiphead .idblock { flex: 1; }
+
+.candhead { display: flex; gap: 10px; align-items: flex-start; }
+.candhead h4 { margin: 0 0 4px; }
+
+/* Motion and juice: smooth, restrained, terminal-premium */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.panel { animation: rise 0.35s ease-out; }
+
+.card.pick { transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+.card.pick:hover { transform: translateY(-2px); }
+
+@keyframes entryin {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.logstream .entry { animation: entryin 0.35s ease-out; }
+
+.logstream .entry.voyage, .logstream .entry.captain {
+  text-shadow: 0 0 14px rgba(111, 211, 255, 0.35);
+}
+
+/* ASCII art log entries: preformatted sector charts */
+.logstream .entry.ascii {
+  white-space: pre;
+  color: var(--dim);
+  font-size: 0.82em;
+  line-height: 1.5;
+}
+
+/* Single toast line (vanilla behavior; the div now exists so it shows) */
+#toast {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99;
+  background: #1a2138;
+  border: 1px solid var(--accent);
+  color: var(--ink);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+/* Signature set pieces: star map and ship schematic */
+.mapwrap, .schemwrap {
+  background: #070a14;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+.starmap, .schematic {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.schematic {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.guide {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, #1c1830 0%, var(--panel) 100%);
+}
+.guide ol { margin: 8px 0; padding-left: 22px; line-height: 1.7; }
+.guide li { margin-bottom: 6px; }
+.guide b { color: var(--gold); }
+
+@media (max-width: 640px) {
+  .shiphead { flex-direction: column; align-items: flex-start; }
+  button { padding: 10px 16px; }
+  table.roster { font-size: 0.85em; }
+}
