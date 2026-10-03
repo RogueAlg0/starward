@@ -126,7 +126,8 @@ export function renderShip(): string {
   const S = getState();
   if (!S.ship || !S.captain) return "";
   const hull = hullById(S.ship.hullId);
-  let h =
+  let h = '<div class="boardsplit">';
+  h +=
     '<div class="panel"><div class="shiphead">' +
     shipSigil(S.ship.name, S.ship.hullId, 110) +
     '<div class="idblock"><h2>' + esc(S.ship.name) +
@@ -136,14 +137,14 @@ export function renderShip(): string {
     S.ship.maxCondition + bar((S.ship.condition / S.ship.maxCondition) * 100, "hullbar") + "</dd>";
   h += "<dt>Credits</dt><dd>" + S.credits + " cr</dd>";
   h += "<dt>Cargo hold</dt><dd>" + hull.cargo + " tons</dd>";
-  h += "<dt>Voyages</dt><dd>" + S.voyageCount + "</dd></div></div></div>";
+  h += "<dt>Voyages</dt><dd>" + S.voyageCount + "</dd></div></div></div></div>";
 
   // signature set piece: the ship schematic, scars and quirks marked
   h += '<div class="panel"><h2>Ship schematic</h2>';
   h += '<div class="schemwrap">' + shipSchematicSVG(S.ship) + "</div>";
   h +=
     '<p class="muted small center">Battle damage marked in red, numbered to match the scar record. ' +
-    "Quirks marked in gold. Drawn from the ship's own service history.</p></div>";
+    "Quirks marked in gold. Drawn from the ship's own service history.</p>";
 
   if (S.ship.scars.length) {
     h += '<h3 class="mt">Scars</h3>';
@@ -167,7 +168,7 @@ export function renderShip(): string {
       )
       .join("");
   }
-  h += "</div>";
+  h += "</div></div>";
 
   h += '<div class="panel"><h2>Captain ' + esc(S.captain.name) + "</h2>";
   h += '<div class="kv"><dt>Age</dt><dd>' + S.captain.age + "</dd>";
@@ -255,7 +256,7 @@ export function renderVoyageSetup(): string {
       '<button class="gold" data-action="dismiss-guide">Understood</button></div>';
   }
   // signature set piece: the star map board
-  h += '<div class="panel"><h2>The board</h2>';
+  h += '<div class="boardsplit"><div class="panel"><h2>The board</h2>';
   h +=
     '<p class="muted small">Known space, per this morning\'s charts. Pick a contract below and its route lights up.</p>';
   h += '<div class="mapwrap">' + starMapSVG(S.contracts, S.activeContract) + "</div></div>";
@@ -277,7 +278,7 @@ export function renderVoyageSetup(): string {
       '<div class="small">Duration: ' + c.ticks + " days &nbsp; Pay: <b style='color:var(--gold)'>" +
       c.pay + " cr</b></div></div>";
   }
-  h += "</div></div>";
+  h += "</div></div></div>";
 
   h += '<div class="panel"><h2>Doctrine</h2><div class="grid c3">';
   for (const d of DOCTRINES) {
@@ -306,8 +307,8 @@ export function renderVoyageRun(): string {
   if (!c || !S.ship) return "";
   const pct = Math.round((S.tick / S.tickTotal) * 100);
   let h =
-    '<div class="panel"><h2>' + esc(c.name) + ": " + esc(c.from) + " to " + esc(c.to) + "</h2>";
-  h += '<div class="row"><div style="flex:1">' + bar(pct, "hullbar") + "</div>";
+    '<div class="voyagerun"><div class="panel"><h2>' + esc(c.name) + ": " + esc(c.from) + " to " + esc(c.to) + "</h2>";
+  h += '<div class="row"><div class="progwrap">' + bar(pct, "hullbar") + "</div>";
   h += '<div class="small muted">Day ' + S.tick + " of " + S.tickTotal + "</div>";
   h += '<button data-action="speed">Speed: ' + S.voyageSpeed + "x</button>";
   h += '<button data-action="skip">Skip to arrival</button></div>';
@@ -316,7 +317,7 @@ export function renderVoyageRun(): string {
   const hurt = aliveCrew().filter((m) => m.health < 60).length;
   if (hurt) h += '<span class="stat" style="color:var(--bad)">Injured: <b>' + hurt + "</b></span>";
   h += "</div></div>";
-  h += '<div class="logstream" id="voylog"></div>';
+  h += '<div class="logstream" id="voylog"></div></div>';
   if (S.voyageCount === 0) {
     h +=
       '<p class="muted small mt">The log streams live below. Speed toggles the pace, Skip jumps straight to arrival. Nothing here can hurt your save: explore freely.</p>';
