@@ -1,35 +1,37 @@
-// The captain's log: every entry is chronological and kept forever.
-import type { Contract, LogKind } from "../types";
-import { doctrineById } from "./data";
+// The war diary: every entry is chronological and kept forever.
+// Writing discipline: each entry shows attempt, odds, actors, outcome, cost.
+// Cause sits adjacent to effect. Nothing here could come from a random
+// sentence generator.
+import type { LogKind, Objective } from "../types";
+import { doctrineById } from "./world";
 import { getState } from "./state";
 
-export function logAdd(text: string, kind?: LogKind): void {
+export function logAdd(text: string, kind?: LogKind, tick?: number, tone?: "good" | "bad"): void {
   const S = getState();
-  S.log.push({ day: S.day, text, kind: kind || "plain" });
+  S.log.push({ day: S.day, tick, text, kind: kind || "plain", tone });
 }
 
-// ASCII art entries (sector charts) render preformatted in the log stream.
+// ASCII art entries (march maps) render preformatted in the diary stream.
 export function logAscii(text: string): void {
   const S = getState();
   S.log.push({ day: S.day, text, kind: "plain", ascii: true });
 }
 
-export function logVoyageHeader(contract: Contract): void {
+export function logCampaignHeader(o: Objective): void {
   const S = getState();
   logAdd(
-    "VOYAGE " +
-      (S.voyageCount + 1) +
+    "CAMPAIGN " +
+      (S.campaignCount + 1) +
       ": " +
-      contract.name +
-      " (" +
-      contract.from +
-      " to " +
-      contract.to +
-      "), " +
-      contract.ticks +
+      o.name +
+      " at " +
+      o.place +
+      ", " +
+      o.ticks +
       " days under " +
       doctrineById(S.doctrine).name.toLowerCase() +
-      " doctrine.",
-    "voyage"
+      " doctrine. " +
+      o.why,
+    "campaign"
   );
 }

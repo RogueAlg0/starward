@@ -3,61 +3,53 @@ import "./index.css";
 import "./terminal.css";
 import type { Screen } from "./types";
 import { getState, loadGame, saveGame, setState, wipeSave } from "./game/state";
-import { crewById, newCrewMember } from "./game/crew";
-import { initStarfield } from "./art/starfield";
-import { shipSigil } from "./art/sigil";
-import { crewIdenticon } from "./art/identicon";
-import { hashStr } from "./game/rng";
-import { goTab, render } from "./ui/shell";
+import { officerById } from "./game/officers";
 import {
-  chooseHeir,
-  chooseStranger,
-  checkCaptainFate,
-} from "./game/captain";
-import {
-  finishCommission,
-  pickHull,
-  rerollCapName,
-  rerollShipName,
-  startCommission,
-  syncCommissionInputs,
+  autoAssign,
+  assignCommander,
+  dismissGuide,
+  finishMuster,
+  rerollGeneralName,
+  startMuster,
+  syncMusterInputs,
   togglePick,
-} from "./game/commission";
-import { dealContracts } from "./game/contracts";
+} from "./game/muster";
 import {
-  commissionReplacement,
-  dealDramas,
-  dealHirePool,
-  dramaChoice,
-  hireCrew,
-  pickNewHull,
-  releaseCrew,
-  repairShip,
-  restock,
-  toVoyageSetup,
-} from "./game/station";
+  buyUpgrade,
+  drill,
+  hireRecruit,
+  inspect,
+  levy,
+  listen,
+  rest,
+} from "./game/garrison";
 import {
-  destroyShip,
-  endVoyage,
-  launchVoyage,
-  runVoyageEvent,
-  skipVoyage,
+  campaignTick,
+  dilemmaChoice,
+  endCampaignFromDebrief,
+  launchDive,
+  launchCampaign,
+  orderCouncil,
+  orderScouts,
+  pushDive,
+  resolveBattle,
+  runCampaignEvent,
+  skipCampaign,
   toggleSpeed,
-  voyageTick,
-} from "./game/voyage";
+  toCampaignSetup,
+  toGarrison,
+  withdrawDive,
+} from "./game/campaign";
+import { chooseHeir, chooseStranger, checkGeneralFate } from "./game/general";
 import { logAdd } from "./game/log";
 import { exportSave, importSave } from "./game/state";
+import { goTab, render } from "./ui/shell";
 
-function pickContract(id: number): void {
+function pickDiveDoctrine(diveIndex: number, id: string): void {
   const S = getState();
-  S.activeContract = id;
-  saveGame(true);
-  render();
-}
-
-function pickDoctrine(id: string): void {
-  const S = getState();
-  S.doctrine = id;
+  const d = S.dives[diveIndex];
+  if (!d) return;
+  d.doctrine = id;
   saveGame(true);
   render();
 }
@@ -68,31 +60,16 @@ function setLogFilter(id: string): void {
   render();
 }
 
-function dismissGuide(): void {
-  const S = getState();
-  S.guideDismissed = true;
-  saveGame(true);
-  render();
-}
-
-function assignStation(id: number, stationId: string): void {
-  const m = crewById(id);
-  if (!m || !m.alive) return;
-  m.station = stationId || null;
-  saveGame(true);
-  render();
-}
-
 function confirmNewDynasty(): void {
   const S = getState();
   if (
     window.confirm(
-      "Start a new dynasty? This wipes the current chronicle (export first if you want to keep it)."
+      "Start a new chronicle? This wipes the current war (export first if you want to keep it)."
     )
   ) {
-    if (S.voyageTimer) window.clearInterval(S.voyageTimer);
+    if (S.campaignTimer) window.clearInterval(S.campaignTimer);
     wipeSave();
-    startCommission();
+    startMuster();
   }
 }
 
@@ -103,62 +80,78 @@ function handleAction(action: string, el: HTMLElement): void {
     case "tab":
       goTab(d.id as Screen);
       break;
-    case "pick-hull":
-      pickHull(d.id as string);
+    case "gen-reroll":
+      rerollGeneralName();
       break;
     case "toggle-pick":
       togglePick(num(d.id));
       break;
-    case "reroll-ship":
-      rerollShipName();
+    case "auto-assign":
+      autoAssign();
       break;
-    case "reroll-cap":
-      rerollCapName();
+    case "finish-muster":
+      finishMuster();
       break;
-    case "finish-commission":
-      finishCommission();
+    case "dismiss-guide":
+      dismissGuide();
       break;
-    case "pick-contract":
-      pickContract(num(d.id));
+    case "drill":
+      drill(d.id as string);
       break;
-    case "pick-doctrine":
-      pickDoctrine(d.id as string);
+    case "rest":
+      rest();
       break;
-    case "launch":
-      launchVoyage();
+    case "listen":
+      listen();
+      break;
+    case "inspect":
+      inspect(d.id as string);
+      break;
+    case "levy":
+      levy(d.id as string);
+      break;
+    case "hire":
+      hireRecruit(num(d.id));
+      break;
+    case "buy-upgrade":
+      buyUpgrade(d.id as string);
+      break;
+    case "to-setup":
+      toCampaignSetup();
+      break;
+    case "pick-dive-doctrine":
+      pickDiveDoctrine(num(d.i), d.id as string);
+      break;
+    case "launch-dive":
+      launchDive(num(d.i));
+      break;
+    case "order-scouts":
+      orderScouts();
+      break;
+    case "order-council":
+      orderCouncil();
       break;
     case "speed":
       toggleSpeed();
       break;
     case "skip":
-      skipVoyage();
+      skipCampaign();
       break;
-    case "drama":
-      dramaChoice(num(d.i), num(d.j));
+    case "dilemma":
+      dilemmaChoice(num(d.i), num(d.j));
       break;
-    case "hire":
-      hireCrew(num(d.id));
+    case "push-dive":
+      pushDive();
       break;
-    case "release":
-      releaseCrew(num(d.id));
+    case "withdraw-dive":
+      withdrawDive();
       break;
-    case "repair":
-      repairShip();
+    case "end-campaign":
+      endCampaignFromDebrief();
       break;
-    case "restock":
-      restock();
+    case "to-garrison":
+      toGarrison();
       break;
-    case "to-setup":
-      toVoyageSetup();
-      break;
-    case "pick-new-hull":
-      pickNewHull(d.id as string);
-      break;
-    case "commission-replacement": {
-      const input = document.getElementById("newshipname") as HTMLInputElement | null;
-      commissionReplacement(input ? input.value : "");
-      break;
-    }
     case "choose-heir":
       chooseHeir(num(d.id));
       break;
@@ -167,9 +160,6 @@ function handleAction(action: string, el: HTMLElement): void {
       break;
     case "log-filter":
       setLogFilter(d.id as string);
-      break;
-    case "dismiss-guide":
-      dismissGuide();
       break;
     case "export":
       exportSave();
@@ -185,14 +175,11 @@ function handleAction(action: string, el: HTMLElement): void {
 function handleInput(inputKind: string, el: HTMLInputElement | HTMLSelectElement): void {
   const S = getState();
   switch (inputKind) {
-    case "ship-name":
-      S.commission.shipName = (el as HTMLInputElement).value;
-      break;
-    case "cap-name":
-      S.commission.captainName = (el as HTMLInputElement).value;
+    case "gen-name":
+      S.muster.generalName = (el as HTMLInputElement).value;
       break;
     case "assign":
-      assignStation(Number(el.dataset.id), el.value);
+      assignCommander(el.dataset.reg as string, Number((el as HTMLSelectElement).value));
       break;
     case "import": {
       const files = (el as HTMLInputElement).files;
@@ -213,42 +200,38 @@ function wireEvents(): void {
     if (!t) return;
     const action = t.dataset.action;
     if (!action) return;
-    if (action === "finish-commission") syncCommissionInputs();
+    if (action === "finish-muster") syncMusterInputs();
     handleAction(action, t);
   });
-  // text inputs update state live without re-rendering (keeps focus)
   app.addEventListener("input", (ev) => {
     const t = (ev.target as HTMLElement).closest("[data-input]") as HTMLInputElement | null;
     if (!t) return;
-    const kind = t.dataset.input;
-    if (kind !== "ship-name" && kind !== "cap-name") return;
-    handleInput(kind, t);
+    if (t.dataset.input !== "gen-name") return;
+    handleInput("gen-name", t);
   });
   app.addEventListener("change", (ev) => {
     const t = (ev.target as HTMLElement).closest("[data-input]") as HTMLInputElement | HTMLSelectElement | null;
     if (!t) return;
     const kind = t.dataset.input;
-    if (!kind || kind === "ship-name" || kind === "cap-name") return;
+    if (!kind || kind === "gen-name") return;
     handleInput(kind, t);
   });
 }
 
 function init(): void {
-  initStarfield();
   wireEvents();
   if (loadGame()) {
-    // never resume mid-voyage: ticks are live, not persisted
     const S = getState();
-    if (S.phase === "voyage") {
-      S.phase = "station";
-      S.screen = "voyage";
-      S.activeContract = null;
-      if (!S.contracts.length) dealContracts();
-      if (!S.hirePool) dealHirePool();
+    if (S.phase === "campaign") {
+      S.phase = "garrison";
+      S.screen = "campaign";
+      S.war = null;
+      S.activeDive = -1;
+      logAdd("The campaign was interrupted by circumstance. The regiments regroup at Evensbrook.", "plain");
     }
     render();
   } else {
-    startCommission();
+    startMuster();
   }
 }
 
@@ -261,46 +244,46 @@ function init(): void {
     setState(v);
   },
   fns: {
-    startCommission,
-    finishCommission,
-    pickHull,
+    startMuster,
+    finishMuster,
     togglePick,
-    pickContract,
-    pickDoctrine,
-    launchVoyage,
-    voyageTick,
-    endVoyage,
-    skipVoyage,
+    autoAssign,
+    assignCommander,
+    toCampaignSetup,
+    pickDiveDoctrine,
+    launchDive,
+    launchCampaign,
+    campaignTick,
+    resolveBattle,
+    skipCampaign,
     toggleSpeed,
-    dealContracts,
-    dealHirePool,
-    dealDramas,
-    dramaChoice,
-    hireCrew,
-    goTab,
-    releaseCrew,
-    repairShip,
-    restock,
-    toVoyageSetup,
-    commissionReplacement,
-    checkCaptainFate,
+    orderScouts,
+    orderCouncil,
+    dilemmaChoice,
+    pushDive,
+    withdrawDive,
+    endCampaignFromDebrief,
+    drill,
+    rest,
+    listen,
+    inspect,
+    levy,
+    hireRecruit,
+    buyUpgrade,
+    toGarrison,
+    checkGeneralFate,
     chooseHeir,
     chooseStranger,
-    destroyShip,
-    runVoyageEvent,
-    newCrewMember,
+    runCampaignEvent,
     logAdd,
     saveGame,
     loadGame,
     exportSave,
-    assignStation,
+    goTab,
     setLogFilter,
-    pickNewHull,
     dismissGuide,
     render,
-    shipSigil,
-    crewIdenticon,
-    hashStr,
+    officerById,
   },
 };
 
@@ -310,4 +293,4 @@ if (document.readyState === "loading") {
   init();
 }
 
-export { syncCommissionInputs };
+export { syncMusterInputs };

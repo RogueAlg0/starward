@@ -1,13 +1,12 @@
 // Game state singleton and the save system.
-// Save format key "starward.save.v1" matches the vanilla prototype, so
-// saves carry over between versions.
+// Save key is warbound-specific so the spaceship saves never leak in.
 import type { GameState } from "../types";
-import { SAVE_KEY, personName, shipName } from "./data";
+import { SAVE_KEY } from "./world";
 import { randInt } from "./rng";
 import { toast } from "../ui/helpers";
 
 let S: GameState | null = null;
-let crewSeq = 1;
+let officerSeq = 1;
 
 export function getState(): GameState {
   if (!S) throw new Error("game state not initialized");
@@ -18,33 +17,54 @@ export function setState(v: GameState | null): void {
   S = v;
 }
 
-export function nextCrewId(): number {
-  return crewSeq++;
+export function nextOfficerId(): number {
+  return officerSeq++;
 }
 
 export function defaultState(): GameState {
   return {
     version: 1,
-    phase: "commission", // commission | voyage_setup | voyage | station | heir
-    captain: null,
-    ship: null,
-    credits: 400,
-    crew: [],
+    phase: "muster",
+    general: null,
+    spoils: 120,
+    officers: [],
     candidates: [],
-    hirePool: [],
-    contracts: [],
-    dramas: [],
+    recruitPool: [],
+    regiments: [],
+    enemy: [],
+    dilemmas: [],
+    gossip: [],
+    upgrades: [],
     log: [],
     day: 1,
-    voyageCount: 0,
+    campaignCount: 0,
     doctrine: "balanced",
-    activeContract: null,
+    war: null,
+    supply: 100,
+    convoyIn: 0,
     tick: 0,
     tickTotal: 0,
-    voyageTimer: null,
-    voyageSpeed: 1,
-    screen: "ship", // tab: ship | crew | voyage | log
-    commission: { shipName: shipName(), hullId: null, captainName: personName(), picked: [] },
+    campaignTimer: null,
+    campaignSpeed: 1,
+    screen: "muster",
+    muster: { generalName: "", picked: [], assignments: {} },
+    ap: 0,
+    aftermath: null,
+    dives: [],
+    activeDive: -1,
+    warScore: 0,
+    warRecord: null,
+    campaignName: "",
+    diveResults: [],
+    relations: { allies: [], rivals: [], favors: [] },
+    stats: { victories: 0, defeats: 0, fallen: 0, spoilsEarned: 0 },
+    fronts: [
+      { sector: "Crowfield Ford", holder: "Veskar" },
+      { sector: "Hollow Hill", holder: "Veskar" },
+      { sector: "Saltfield", holder: "Thalmar" },
+      { sector: "Millford", holder: "Thalmar" },
+      { sector: "Graywater", holder: "Thalmar" },
+    ],
   };
 }
 
@@ -52,7 +72,7 @@ export function saveGame(silent?: boolean): void {
   if (!S) return;
   try {
     const copy: Record<string, unknown> = { ...S };
-    delete copy.voyageTimer; // timers do not serialize
+    delete copy.campaignTimer; // timers do not serialize
     localStorage.setItem(SAVE_KEY, JSON.stringify(copy));
     if (!silent) toast("Progress saved.");
   } catch {
@@ -67,8 +87,25 @@ export function loadGame(): boolean {
     const data = JSON.parse(raw) as GameState | null;
     if (!data || data.version !== 1) return false;
     S = data;
-    S.voyageTimer = null;
-    crewSeq = 1000 + S.crew.length + randInt(1, 500);
+    S.campaignTimer = null;
+    if (!S.stats) S.stats = { victories: 0, defeats: 0, fallen: 0, spoilsEarned: 0 };
+    if (!S.fronts)
+      S.fronts = [
+        { sector: "Crowfield Ford", holder: "Veskar" },
+        { sector: "Hollow Hill", holder: "Veskar" },
+        { sector: "Saltfield", holder: "Thalmar" },
+        { sector: "Millford", holder: "Thalmar" },
+        { sector: "Graywater", holder: "Thalmar" },
+      ];
+    if (!S.dives) S.dives = [];
+    if (S.activeDive == null) S.activeDive = -1;
+    if (!S.diveResults) S.diveResults = [];
+    if (S.campaignName == null) S.campaignName = "";
+    if (!S.relations) S.relations = { allies: [], rivals: [], favors: [] };
+    if (S.warScore == null) S.warScore = 0;
+    if ((S.screen as string) === "army" || (S.screen as string) === "officers") S.screen = "muster";
+    if (S._painted == null) S._painted = 0;
+    officerSeq = 1000 + S.officers.length + randInt(1, 500);
     return true;
   } catch {
     return false;
@@ -84,16 +121,16 @@ export function wipeSave(): void {
 }
 
 export function exportSave(): void {
-  if (!S || !S.captain) {
+  if (!S || !S.general) {
     toast("Nothing to export yet.");
     return;
   }
   const copy: Record<string, unknown> = { ...S };
-  delete copy.voyageTimer;
+  delete copy.campaignTimer;
   const blob = new Blob([JSON.stringify(copy, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "starward-dynasty.json";
+  a.download = "warbound-chronicle.json";
   document.body.appendChild(a);
   a.click();
   setTimeout(() => {
@@ -107,19 +144,19 @@ export function importSave(file: File, render: () => void): void {
   reader.onload = () => {
     try {
       const data = JSON.parse(String(reader.result)) as GameState | null;
-      if (!data || data.version !== 1 || !data.captain) {
-        toast("That file is not a Starward save.");
+      if (!data || data.version !== 1 || !data.general) {
+        toast("That file is not a Warbound chronicle.");
         return;
       }
-      if (S && S.voyageTimer) clearInterval(S.voyageTimer);
+      if (S && S.campaignTimer) clearInterval(S.campaignTimer);
       S = data;
-      S.voyageTimer = null;
-      S.phase = "station";
-      S.screen = "ship";
-      crewSeq = 1000 + S.crew.length + randInt(1, 500);
+      S.campaignTimer = null;
+      S.phase = "garrison";
+      S.screen = "muster";
+      officerSeq = 1000 + S.officers.length + randInt(1, 500);
       saveGame(true);
       render();
-      toast("Dynasty imported. The chronicle continues.");
+      toast("Chronicle imported. The war goes on.");
     } catch {
       toast("Could not read that file.");
     }
