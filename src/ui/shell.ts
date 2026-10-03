@@ -22,9 +22,10 @@ export function headerHTML(): string {
   const ship = S.ship ? esc(S.ship.name) : "no ship";
   return (
     '<div class="titlebar"><h1>STARWARD</h1>' +
-    '<div class="sub">Day ' + S.day + " &nbsp;|&nbsp; " + ship +
-    " &nbsp;|&nbsp; Captain " + cap +
-    ' &nbsp;|&nbsp; <b style="color:var(--gold)">' + S.credits + " cr</b></div></div>"
+    '<div class="sub"><span class="tseg">Day ' + S.day + "</span>" +
+    '<span class="tseg">' + ship + "</span>" +
+    '<span class="tseg">Captain ' + cap + "</span>" +
+    '<span class="tseg gold">' + S.credits + " cr</span></div></div>"
   );
 }
 

@@ -54,17 +54,19 @@ export function renderCommission(): string {
     "Name your vessel, choose a hull, draft a crew of six. The chronicle begins the moment you sign.</p>";
   h += '<div class="grid c2">';
   h +=
-    '<div><label>Ship name</label><div class="row">' +
-    shipSigil(c.shipName || "Unnamed", c.hullId || "frigate", 64) +
-    '<div style="flex:1"><input type="text" id="shipname" data-input="ship-name" value="' +
+    '<div><div class="lblrow"><label>Ship name</label>' +
+    '<button class="linkbtn" data-action="reroll-ship">Reroll</button></div>' +
+    '<div class="namerow">' +
+    shipSigil(c.shipName || "Unnamed", c.hullId || "frigate", 56) +
+    '<input type="text" id="shipname" data-input="ship-name" value="' +
     esc(c.shipName) +
-    '">' +
-    '<button class="mt" data-action="reroll-ship">Reroll name</button></div></div></div>';
+    '"></div></div>';
   h +=
-    '<div><label>Captain name</label><input type="text" id="capname" data-input="cap-name" value="' +
+    '<div><div class="lblrow"><label>Captain name</label>' +
+    '<button class="linkbtn" data-action="reroll-cap">Reroll</button></div>' +
+    '<input type="text" id="capname" data-input="cap-name" value="' +
     esc(c.captainName) +
-    '">' +
-    '<button class="mt" data-action="reroll-cap">Reroll name</button></div>';
+    '"></div>';
   h += "</div></div>";
 
   h += '<div class="panel"><h2>Choose a hull</h2><div class="grid c3">';
@@ -75,9 +77,12 @@ export function renderCommission(): string {
       '<div class="row">' + shipSigil("preview|" + hull.id, hull.id, 72) +
       "<h4>" + esc(hull.name) + "</h4></div>" +
       '<div class="small muted">' + esc(hull.desc) + "</div>" +
-      '<div class="small mt">Cargo ' + hull.cargo + " &nbsp; Hull " + hull.hull +
-      " &nbsp; Guns " + hull.guns + " &nbsp; Scan " + hull.scan + "</div>" +
-      '<div class="small" style="color:var(--gold)">' + esc(hull.bonus) + "</div></div>";
+      '<div class="statgrid">' +
+      '<div><span class="micro">Cargo</span><b>' + hull.cargo + "</b></div>" +
+      '<div><span class="micro">Hull</span><b>' + hull.hull + "</b></div>" +
+      '<div><span class="micro">Guns</span><b>' + hull.guns + "</b></div>" +
+      '<div><span class="micro">Scan</span><b>' + hull.scan + "</b></div></div>" +
+      '<div class="small mt" style="color:var(--gold)">' + esc(hull.bonus) + "</div></div>";
   }
   h += "</div></div>";
 
@@ -210,8 +215,8 @@ export function renderCrew(): string {
     h +=
       "<td><b>" + esc(m.name) + '</b> <span class="muted small">age ' + m.age +
       "<br>" + esc(m.hook) + "</span><br>" + relText(m) + "</td>";
-    h += "<td>" + Math.round(m.health) + bar(m.health, "hp") + "</td>";
-    h += "<td>" + Math.round(m.morale) + bar(m.morale, "mor") + "</td>";
+    h += '<td><div class="meter"><b>' + Math.round(m.health) + "</b>" + bar(m.health, "hp") + "</div></td>";
+    h += '<td><div class="meter"><b>' + Math.round(m.morale) + "</b>" + bar(m.morale, "mor") + "</div></td>";
     h += '<td><select data-input="assign" data-id="' + m.id + '">';
     h += '<option value="">off duty</option>';
     for (const st of STATIONS) {
@@ -273,10 +278,10 @@ export function renderVoyageSetup(): string {
       '" data-action="pick-contract" data-id="' + c.id + '">' +
       "<h4>" + esc(c.name) + "</h4>" +
       '<div class="small muted">' + esc(c.from) + " to " + esc(c.to) + "</div>" +
-      '<div class="small mt">Risk: <b style="color:var(--' + riskColor[c.risk] + ')">' + c.risk +
-      "</b> <span class='muted'>" + esc(riskDesc(c.risk)) + "</span></div>" +
-      '<div class="small">Duration: ' + c.ticks + " days &nbsp; Pay: <b style='color:var(--gold)'>" +
-      c.pay + " cr</b></div></div>";
+      '<div class="spec"><span class="micro">Risk</span><b style="color:var(--' + riskColor[c.risk] + ')">' + c.risk +
+      '</b><span class="muted">' + esc(riskDesc(c.risk)) + "</span></div>" +
+      '<div class="spec route"><span class="micro">Route</span><b class="num">' + c.ticks + ' days</b>' +
+      '<span class="micro">Pay</span><b class="num" style="color:var(--gold)">' + c.pay + " cr</b></div></div>";
   }
   h += "</div></div></div>";
 
@@ -312,10 +317,10 @@ export function renderVoyageRun(): string {
   h += '<div class="small muted">Day ' + S.tick + " of " + S.tickTotal + "</div>";
   h += '<button data-action="speed">Speed: ' + S.voyageSpeed + "x</button>";
   h += '<button data-action="skip">Skip to arrival</button></div>';
-  h += '<div class="row mt small"><span class="stat">Hull <b>' + Math.round(S.ship.condition) + "</b></span>";
-  h += '<span class="stat">Credits <b>' + S.credits + "</b></span>";
+  h += '<div class="statstrip"><span class="stat"><span class="micro">Hull</span><b>' + Math.round(S.ship.condition) + "</b></span>";
+  h += '<span class="stat"><span class="micro">Credits</span><b>' + S.credits + "</b></span>";
   const hurt = aliveCrew().filter((m) => m.health < 60).length;
-  if (hurt) h += '<span class="stat" style="color:var(--bad)">Injured: <b>' + hurt + "</b></span>";
+  if (hurt) h += '<span class="stat"><span class="micro">Injured</span><b style="color:var(--bad)">' + hurt + "</b></span>";
   h += "</div></div>";
   h += '<div class="logstream" id="voylog"></div></div>';
   if (S.voyageCount === 0) {
@@ -365,13 +370,12 @@ export function renderStation(): string {
   const repairCost = Math.ceil((S.ship.maxCondition - S.ship.condition) * 2);
   h +=
     '<div class="row"><button ' + (repairCost <= 0 || S.credits < repairCost ? "disabled" : "") +
-    ' data-action="repair">Repair hull (' + repairCost + " cr)</button>";
-  h +=
+    ' data-action="repair">Repair hull (' + repairCost + " cr)</button>" +
     '<button ' + (S.credits < 40 ? "disabled" : "") +
-    ' data-action="restock">Restock and celebrate (40 cr, +morale)</button>';
-  h +=
-    '<span class="muted small">Hull ' + Math.round(S.ship.condition) + "/" + S.ship.maxCondition +
-    " &nbsp; Credits " + S.credits + "</span></div></div>";
+    ' data-action="restock">Restock and celebrate (40 cr, +morale)</button></div>' +
+    '<div class="statstrip"><span class="stat"><span class="micro">Hull</span><b>' +
+    Math.round(S.ship.condition) + "/" + S.ship.maxCondition + "</b></span>" +
+    '<span class="stat"><span class="micro">Credits</span><b>' + S.credits + "</b></span></div></div>";
 
   // drama
   if (S.dramas && S.dramas.length) {

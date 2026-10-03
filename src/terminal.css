@@ -1,5 +1,12 @@
 /* Starward terminal aesthetic: dark console styling, zero assets.
- * Imported after Tailwind so these component rules win over preflight. */
+ * Imported after Tailwind so these component rules win over preflight.
+ *
+ * TIGHTNESS SYSTEM
+ * Spacing: strict 4px scale. 4 / 8 / 12 / 16 / 24. Nothing else.
+ * Type: five sizes only. 20 / 16 / 14 / 13 / 11.
+ * Radius: 6px on everything box-shaped. Tags stay pill by design.
+ * Motion: 120-200ms, ease-out, opacity and color only. Nothing floats.
+ * Numbers: tabular everywhere; compared numbers right-align. */
 
 :root {
   --bg: #0b0e1a;
@@ -13,6 +20,7 @@
   --good: #7dffa8;
   --bad: #ff8d7d;
   --warn: #ffb46f;
+  --r: 6px;
 }
 
 html { height: 100%; }
@@ -25,6 +33,9 @@ body {
   background-attachment: fixed;
   color: var(--ink);
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
   overscroll-behavior: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -45,71 +56,119 @@ body {
   #app { max-width: 1380px; padding: 24px 28px 64px; }
 }
 
-h1, h2, h3 { margin: 0.4em 0; font-weight: 600; }
-h1 { font-size: 1.6em; letter-spacing: 0.08em; }
-h2 { font-size: 1.25em; color: var(--accent); }
-h3 { font-size: 1.05em; color: var(--gold); }
+/* Type scale: 20 / 16 / 14 / 13 / 11. Nothing else. */
+h1, h2, h3 { margin: 0; font-weight: 600; }
+h1 { font-size: 20px; letter-spacing: 0.12em; }
+h2 { font-size: 16px; color: var(--accent); margin: 0 0 12px; }
+h3 { font-size: 14px; color: var(--gold); margin: 16px 0 8px; }
+.small { font-size: 13px; }
+.micro {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--dim); font-weight: 600;
+}
 
 .titlebar {
-  display: flex; align-items: baseline; justify-content: space-between;
-  flex-wrap: wrap; gap: 2px 16px;
-  border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px 16px;
+  border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px;
 }
-.titlebar .sub { color: var(--dim); font-size: 0.85em; }
+/* Segmented status line: separators are borders, so nothing dangles on wrap. */
+.titlebar .sub {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  column-gap: 12px; row-gap: 4px;
+  color: var(--dim); font-size: 13px;
+}
+.titlebar .sub .tseg + .tseg { border-left: 1px solid var(--line); padding-left: 12px; }
+.titlebar .sub .tseg.gold { color: var(--gold); font-weight: 700; }
 
-nav.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+nav.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 nav.tabs button {
   background: var(--panel); color: var(--dim); border: 1px solid var(--line);
-  padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.95em;
+  padding: 10px 16px; border-radius: var(--r); cursor: pointer;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.02em; min-height: 40px;
+  transition: border-color 0.12s ease-out, background-color 0.12s ease-out, color 0.12s ease-out;
 }
-nav.tabs button.active, nav.tabs button:hover { color: var(--ink); border-color: var(--accent); }
+nav.tabs button.active, nav.tabs button:hover:not(:disabled) { color: var(--ink); border-color: var(--accent); }
+nav.tabs button.active { background: var(--panel2); }
 nav.tabs button:disabled { opacity: 0.35; cursor: default; }
 
 .panel {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-  padding: 14px 16px; margin-bottom: 12px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 16px; margin-bottom: 16px;
 }
 
-.grid { display: grid; gap: 10px; }
+.grid { display: grid; gap: 12px; }
 .grid.c2 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .grid.c3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 
 .card {
-  background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r);
   padding: 12px; cursor: default;
 }
-.card.pick { cursor: pointer; }
-.card.pick:hover { border-color: var(--accent); }
+.card.pick {
+  cursor: pointer;
+  transition: border-color 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+.card.pick:hover:not(.selected) { border-color: var(--accent); }
 .card.selected { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
-.card h4 { margin: 0 0 6px; }
-.card .dim { color: var(--dim); font-size: 0.88em; }
+.card h4 { margin: 0 0 8px; font-size: 14px; }
+.card .dim { color: var(--dim); font-size: 13px; }
 
 button {
   background: #223052; color: var(--ink); border: 1px solid var(--line);
-  padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.95em;
+  padding: 10px 16px; border-radius: var(--r); cursor: pointer;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.02em; min-height: 40px;
+  transition: border-color 0.12s ease-out, background-color 0.12s ease-out, filter 0.1s ease-out;
 }
 button:hover:not(:disabled) { border-color: var(--accent); }
+button:active:not(:disabled) { filter: brightness(1.3); }
 button:disabled { opacity: 0.4; cursor: default; }
 button.primary { background: #1d4d33; border-color: #2f7d4f; }
 button.danger { background: #4d2323; border-color: #7d3a3a; }
 button.gold { background: #4d3f1d; border-color: #7d6a2f; }
+/* Quiet text action: reroll links, small utilities. */
+button.linkbtn {
+  background: none; border: none; min-height: 0; padding: 4px 0;
+  color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+}
+button.linkbtn:hover { text-decoration: underline; }
 
 input[type="text"], select {
   background: #0e1322; color: var(--ink); border: 1px solid var(--line);
-  border-radius: 6px; padding: 8px 10px; font-size: 0.95em; width: 100%;
+  border-radius: var(--r); padding: 10px 12px; font-size: 14px; width: 100%;
+  transition: border-color 0.12s ease-out;
 }
-label { display: block; margin: 8px 0 4px; color: var(--dim); font-size: 0.9em; }
+input[type="text"]:focus, select:focus { border-color: var(--accent); outline: none; }
+/* Native file picker, dressed in the button language. */
+input[type="file"] { font-size: 13px; color: var(--dim); }
+input[type="file"]::file-selector-button {
+  background: #223052; color: var(--ink); border: 1px solid var(--line);
+  padding: 8px 12px; border-radius: var(--r); cursor: pointer;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.02em; margin-right: 8px;
+  transition: border-color 0.12s ease-out;
+}
+input[type="file"]::file-selector-button:hover { border-color: var(--accent); }
+label { display: block; margin: 0 0 6px; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
 
-.bar { height: 8px; background: #0e1322; border-radius: 4px; overflow: hidden; margin: 4px 0; }
-.bar > span { display: block; height: 100%; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.bar { height: 8px; background: #0e1322; border-radius: 4px; overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: 4px; transition: width 0.2s ease-out; }
 .bar .hp { background: linear-gradient(90deg, #3fae6a, var(--good)); }
 .bar .mor { background: linear-gradient(90deg, #3f7dae, var(--accent)); }
 .bar .hullbar { background: linear-gradient(90deg, #8a6f3f, var(--gold)); }
 .progwrap { flex: 1; min-width: 140px; }
 
+/* Meter: number right-aligned beside its bar. One row, no stacking. */
+.meter { display: flex; align-items: center; gap: 8px; }
+.meter b { min-width: 32px; text-align: right; font-size: 14px; }
+.meter .bar { flex: 1; }
+
 .tag {
-  display: inline-block; font-size: 0.78em; padding: 2px 8px; border-radius: 10px;
+  display: inline-block; font-size: 11px; letter-spacing: 0.03em;
+  padding: 3px 10px; border-radius: 999px;
   border: 1px solid var(--line); color: var(--dim); margin: 2px 4px 2px 0;
+  white-space: nowrap;
 }
 .tag.trait { color: var(--accent); border-color: #2f5d7d; }
 .tag.hook { color: var(--warn); border-color: #7d5a2f; }
@@ -117,43 +176,68 @@ label { display: block; margin: 8px 0 4px; color: var(--dim); font-size: 0.9em; 
 .tag.scar { color: var(--bad); border-color: #7d3a3a; }
 .tag.quirk { color: var(--gold); border-color: #7d6a2f; }
 
-.logstream {
-  background: #070a14; border: 1px solid var(--line); border-radius: 8px;
-  padding: 12px 14px; height: min(62dvh, 560px); min-height: 280px; overflow-y: auto;
-  line-height: 1.55;
-  font-family: Consolas, Menlo, monospace; font-size: 0.88em;
+/* Spec rows: micro label, value, note. Used in contract and hull cards. */
+.spec { display: grid; grid-template-columns: 52px auto minmax(0, 1fr); gap: 4px 8px; align-items: baseline; margin-top: 8px; font-size: 13px; }
+.spec.route { grid-template-columns: 52px auto auto auto; justify-content: start; }
+.spec .micro { white-space: nowrap; }
+.spec b { white-space: nowrap; font-size: 14px; }
+.spec .muted { min-width: 0; }
+.spec .gold { color: var(--gold); }
+
+/* Stat grid: compact label-over-value cells for hull cards. */
+.statgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.statgrid .micro { display: block; margin-bottom: 2px; }
+.statgrid b { font-size: 14px; }
+
+/* Stat strip: a ruled row of label/value stats. */
+.statstrip {
+  display: flex; flex-wrap: wrap; gap: 8px 20px;
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
 }
-.logstream .day { color: var(--gold); font-weight: 600; margin-top: 8px; }
-.logstream .entry { margin: 2px 0; }
+.stat { display: flex; align-items: baseline; gap: 6px; margin: 0; }
+.stat b { color: var(--accent); font-size: 14px; }
+
+.logstream {
+  background: #070a14; border: 1px solid var(--line); border-radius: var(--r);
+  padding: 12px 16px; height: min(62dvh, 560px); min-height: 280px; overflow-y: auto;
+  line-height: 1.55;
+  font-family: Consolas, Menlo, monospace; font-size: 14px;
+}
+.logstream .day { color: var(--gold); font-weight: 600; margin-top: 12px; }
+.logstream .entry { margin: 3px 0; }
 .logstream .entry.good { color: var(--good); }
 .logstream .entry.bad { color: var(--bad); }
 .logstream .entry.voyage { color: var(--accent); font-weight: 600; }
 .logstream .entry.captain { color: var(--gold); }
 .logstream.compact { height: min(54dvh, 480px); min-height: 240px; }
 
-.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .spacer { flex: 1; }
 .muted { color: var(--dim); }
-.small { font-size: 0.85em; }
+.small { font-size: 13px; }
 .center { text-align: center; }
-.mt { margin-top: 12px; }
+.mt { margin-top: 16px; }
 
-.stat { display: inline-block; margin-right: 16px; }
-.stat b { color: var(--accent); }
-
-table.roster { width: 100%; border-collapse: collapse; font-size: 0.92em; }
-table.roster th, table.roster td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-table.roster th { color: var(--dim); font-weight: 600; }
+table.roster { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.roster th, table.roster td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.roster th {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--dim); font-weight: 600; padding: 8px;
+}
+table.roster td:nth-child(3), table.roster td:nth-child(4),
+table.roster th:nth-child(3), table.roster th:nth-child(4) { width: 132px; }
+table.roster td:nth-child(5) { width: 190px; }
 
 .notice {
-  border: 1px solid var(--warn); background: #2a1f12; border-radius: 8px;
-  padding: 10px 14px; margin-bottom: 12px;
+  border: 1px solid var(--warn); background: #2a1f12; border-radius: var(--r);
+  padding: 12px; margin-bottom: 12px;
 }
+.notice p { margin: 0 0 12px; }
 .notice.good { border-color: var(--good); background: #122a1c; }
 .notice.bad { border-color: var(--bad); background: #2a1414; }
 
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.95em; }
-.kv dt { color: var(--dim); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; align-items: baseline; }
+.kv dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); font-weight: 600; }
 .kv dd { margin: 0; }
 
 @media (max-width: 640px) {
@@ -174,7 +258,7 @@ table.roster th { color: var(--dim); font-weight: 600; }
 
 .identicon {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r);
   vertical-align: middle;
   flex: none;
 }
@@ -187,29 +271,28 @@ table.roster th { color: var(--dim); font-weight: 600; }
 }
 
 .shiphead { display: flex; gap: 16px; align-items: center; }
-.shiphead .idblock { flex: 1; }
+.shiphead .idblock { flex: 1; min-width: 0; }
 
-.candhead { display: flex; gap: 10px; align-items: flex-start; }
+.candhead { display: flex; gap: 12px; align-items: flex-start; }
+.candhead > div { min-width: 0; }
 .candhead h4 { margin: 0 0 4px; }
 
-/* Motion and juice: smooth, restrained, terminal-premium */
+/* Name blocks: label row with a quiet reroll action, then art + input. */
+.lblrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.lblrow label { margin: 0; }
+.namerow { display: flex; gap: 12px; align-items: center; }
+.namerow input { flex: 1; min-width: 0; }
 
-@keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
+/* Motion: 120-200ms, ease-out, opacity and color only. Nothing floats.
+   Panels render instantly (the voyage status panel re-renders every tick;
+   animating it would shimmer forever). Log entries fade in fast. */
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.panel { animation: rise 0.35s ease-out; }
-
-.card.pick { transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
-.card.pick:hover { transform: translateY(-2px); }
-
-@keyframes entryin {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: none; }
-}
-
-.logstream .entry { animation: entryin 0.35s ease-out; }
+.logstream .entry { animation: fadein 0.16s ease-out; }
 
 .logstream .entry.voyage, .logstream .entry.captain {
   text-shadow: 0 0 14px rgba(111, 211, 255, 0.35);
@@ -243,7 +326,7 @@ table.roster th { color: var(--dim); font-weight: 600; }
 .mapwrap, .schemwrap {
   background: #070a14;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--r);
   padding: 8px;
   overflow-x: auto;
 }
@@ -263,8 +346,8 @@ table.roster th { color: var(--dim); font-weight: 600; }
   border-color: var(--gold);
   background: linear-gradient(180deg, #1c1830 0%, var(--panel) 100%);
 }
-.guide ol { margin: 8px 0; padding-left: 22px; line-height: 1.7; }
-.guide li { margin-bottom: 6px; }
+.guide ol { margin: 8px 0; padding-left: 20px; line-height: 1.5; }
+.guide li { margin-bottom: 4px; }
 .guide b { color: var(--gold); }
 
 @media (max-width: 640px) {
@@ -303,8 +386,8 @@ table.roster th { color: var(--dim); font-weight: 600; }
     border-top: 1px solid var(--line);
   }
   nav.tabs button {
-    min-height: 54px; font-size: 0.82em; padding: 8px 4px;
-    border-color: transparent; border-radius: 8px;
+    min-height: 54px; font-size: 13px; padding: 8px 4px;
+    border-color: transparent; border-radius: var(--r);
     display: flex; align-items: center; justify-content: center; text-align: center;
   }
   nav.tabs button.active { border-color: var(--accent); background: var(--panel2); color: var(--ink); }
@@ -318,17 +401,17 @@ table.roster th { color: var(--dim); font-weight: 600; }
   table.roster, table.roster tbody { display: block; width: 100%; }
   table.roster tr {
     display: block; width: 100%; box-sizing: border-box;
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
-    margin-bottom: 10px; padding: 10px 12px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r);
+    margin-bottom: 12px; padding: 12px;
   }
   table.roster tr:first-child { display: none; }
-  table.roster td { display: block; width: 100%; border-bottom: none; padding: 3px 0; box-sizing: border-box; }
+  table.roster td { display: block; width: 100%; border-bottom: none; padding: 4px 0; box-sizing: border-box; }
   table.roster td:first-child { padding-bottom: 0; }
   table.roster select { width: 100%; }
-  /* unlabeled numbers in card mode get micro-labels */
+  /* unlabeled meters in card mode get micro-labels */
   table.roster td:nth-child(3)::before, table.roster td:nth-child(4)::before {
-    display: block; font-size: 0.72em; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--dim); margin-bottom: 2px;
+    display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--dim); font-weight: 600; margin-bottom: 4px;
   }
   table.roster td:nth-child(3)::before { content: "Health"; }
   table.roster td:nth-child(4)::before { content: "Morale"; }
@@ -336,8 +419,8 @@ table.roster th { color: var(--dim); font-weight: 600; }
   /* voyage progress bar gets its own full-width line on phones */
   .progwrap { flex: 1 1 100%; }
 
-  .titlebar h1 { font-size: 1.25em; }
-  .titlebar .sub { font-size: 0.8em; flex-basis: 100%; }
+  .titlebar h1 { font-size: 18px; }
+  .titlebar .sub { font-size: 12px; flex-basis: 100%; }
 
   .shiphead { flex-direction: column; align-items: flex-start; }
   .candhead { align-items: center; }
