@@ -1,4 +1,6 @@
 // Entry point: init, delegated event handling, headless test hooks.
+import "./index.css";
+import "./terminal.css";
 import type { Screen } from "./types";
 import { getState, loadGame, saveGame, setState, wipeSave } from "./game/state";
 import { crewById, newCrewMember } from "./game/crew";
